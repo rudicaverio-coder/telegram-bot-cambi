@@ -1,4 +1,6 @@
 # bot_cambi_webhook.py
+#GitHub per Gist:  g h p _ q n F F B t U P Y q 0 8 a c r 3 S j j W H w n 5 J i g P C A 2 5 1 i F c
+#Github Gist backup:98e323b6ad67035edf13a6d57f97ffe1
 import logging
 import sqlite3
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
@@ -677,3 +679,4 @@ def main_cambi():
 
 if __name__ == '__main__':
     main_cambi()
+
