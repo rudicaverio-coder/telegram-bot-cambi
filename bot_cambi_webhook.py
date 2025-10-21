@@ -653,11 +653,16 @@ def main_cambi():
     print(f"🔄 Configurazione webhook su {WEBHOOK_URL}/webhook")
     
     try:
-        # Imposta il webhook su Telegram
-        application.bot.set_webhook(
-            url=f"{WEBHOOK_URL}/webhook",
-            # secret_token='WEBHOOK_SECRET'  # Opzionale
-        )
+        # Imposta il webhook su Telegram (versione async corretta)
+        import asyncio
+        async def set_webhook_async():
+            await application.bot.set_webhook(
+                url=f"{WEBHOOK_URL}/webhook",
+                # secret_token='WEBHOOK_SECRET'  # Opzionale
+            )
+        
+        # Esegui la funzione async
+        asyncio.run(set_webhook_async())
         
         print("✅ Webhook configurato con successo!")
         print("🤖 Bot Cambi VVF in ascolto su webhook...")
@@ -668,15 +673,15 @@ def main_cambi():
             listen="0.0.0.0",
             port=WEBHOOK_PORT,
             webhook_url=f"{WEBHOOK_URL}/webhook",
-            secret_token='WEBHOOK_SECRET'  # Opzionale
+            secret_token='WEBHOOK_SECRET'
         )
         
     except Exception as e:
         print(f"❌ Errore avvio webhook: {e}")
-        # Fallback a polling in caso di errore
         print("🔄 Fallback a polling...")
         application.run_polling()
 
 if __name__ == '__main__':
     main_cambi()
+
 
