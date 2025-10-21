@@ -629,11 +629,10 @@ def run_flask_cambi():
 
 # === MAIN CON WEBHOOK ===
 def main_cambi():
-    """Funzione principale del bot cambi con WEBHOOK"""
-    print("🚀 Avvio Bot Gestione Cambi VVF con WEBHOOK...")
+    """Funzione principale del bot cambi - VERSIONE 20.7 COMPATIBLE"""
+    print("🚀 Avvio Bot Gestione Cambi VVF...")
     
-    # Configura application globale
-    global application
+    # Configura application
     application = Application.builder().token(BOT_TOKEN_CAMBI).build()
     
     # Aggiungi handler
@@ -641,47 +640,34 @@ def main_cambi():
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message_cambi))
     application.add_handler(CallbackQueryHandler(button_handler_cambi))
     
-    # Avvia Flask in thread separato
-    flask_thread = threading.Thread(target=run_flask_cambi, daemon=True)
+    # Avvia Flask in thread separato (per health checks)
+    import threading
+    from flask import Flask
+    app = Flask(__name__)
+
+    @app.route('/')
+    def home():
+        return "🤖 Bot Cambi VVF - ONLINE 🟢"
+
+    @app.route('/health')
+    def health():
+        return "OK"
+
+    def run_flask():
+        app.run(host='0.0.0.0', port=10001, debug=False)
+
+    flask_thread = threading.Thread(target=run_flask, daemon=True)
     flask_thread.start()
     
-    # Avvia backup scheduler
-    backup_thread = threading.Thread(target=backup_scheduler_cambi, daemon=True)
-    backup_thread.start()
+    print("🤖 Bot Cambi VVF Avviato!")
+    print("📍 Modalità: Polling + Flask Health Check")
+    print("👤 Utilizzatore: Solo user ID", MY_USER_ID)
     
-    # Configura webhook
-    print(f"🔄 Configurazione webhook su {WEBHOOK_URL}/webhook")
-    
-    try:
-        # Imposta il webhook su Telegram (versione async corretta)
-        import asyncio
-        async def set_webhook_async():
-            await application.bot.set_webhook(
-                url=f"{WEBHOOK_URL}/webhook",
-                # secret_token='WEBHOOK_SECRET'  # Opzionale
-            )
-        
-        # Esegui la funzione async
-        asyncio.run(set_webhook_async())
-        
-        print("✅ Webhook configurato con successo!")
-        print("🤖 Bot Cambi VVF in ascolto su webhook...")
-        print("📍 Porta:", WEBHOOK_PORT)
-        
-        # Avvia l'applicazione con webhook
-        application.run_webhook(
-            listen="0.0.0.0",
-            port=WEBHOOK_PORT,
-            webhook_url=f"{WEBHOOK_URL}/webhook",
-            secret_token='WEBHOOK_SECRET'
-        )
-        
-    except Exception as e:
-        print(f"❌ Errore avvio webhook: {e}")
-        print("🔄 Fallback a polling...")
-        application.run_polling()
+    # Avvia con polling (funziona sempre con 20.7)
+    application.run_polling()
 
 if __name__ == '__main__':
     main_cambi()
+
 
 
